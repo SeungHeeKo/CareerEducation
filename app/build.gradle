@@ -1,0 +1,52 @@
+// application이 library로 변경되었다.
+apply plugin: 'com.android.library'
+
+android {
+
+    compileSdkVersion 24
+    buildToolsVersion "24.0.0"
+
+    lintOptions {
+        abortOnError false
+    }
+    defaultConfig {
+        // 여기에 있던 applicationId가 삭제 되었다.
+        minSdkVersion 18
+        targetSdkVersion 24
+        // versionCode, versionName도 삭제 되었다.
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    defaultConfig {
+        multiDexEnabled true
+    }
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile 'com.android.support:appcompat-v7:24.0.0'
+    compile files('libs/classes.jar')
+
+}
+//==================== 추가된 부분이다. =====================
+//task to delete the old jar
+task deleteOldJar(type: Delete) {
+    delete 'release/AndroidPlugin.jar'
+}
+
+//task to export contents as jar
+task exportJar(type: Copy) {
+    from('build/intermediates/bundles/release/')
+    into('release/')
+    include('classes.jar')
+    ///Rename the jar
+    rename('classes.jar', 'AndroidPlugin.jar')
+}
+
+exportJar.dependsOn(deleteOldJar, build)
+
+//==================================================
